@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   # 你现在可以直接在任何继承自 ApplicationController 的控制器中使用 ok/fail 方法
 
   def index
-    users = User.all
+    users = User.limit(10)
     ok(data: users, msg: "Users retrieved successfully", code: 200)
   end
 
@@ -27,6 +27,6 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:name, :email)
+    params.require(:user).permit(:name)
   end
 end

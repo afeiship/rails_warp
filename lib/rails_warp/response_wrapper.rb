@@ -6,27 +6,27 @@ module RailsWarp
     # 成功响应 - 仅支持 Hash 参数
     def ok(**options)
       data = options[:data]
-      msg = options[:msg] || "success"
+      message = options[:message] || nil
       code = options[:code] || 200
-      render json: build_response(true, data, msg, code, **options.except(:data, :msg, :code))
+      render json: build_response(true, data, message, code, **options.except(:data, :message, :code))
     end
 
     # 失败响应 - 仅支持 Hash 参数
     def fail(**options)
-      msg = options[:msg] || "error"
+      message = options[:message] || "error"
       code = options[:code] || 500
       data = options[:data]
-      render json: build_response(false, data, msg, code, **options.except(:data, :msg, :code)), status: get_http_status(code)
+      render json: build_response(false, data, message, code, **options.except(:data, :message, :code)), status: get_http_status(code)
     end
 
     private
 
     # 构建响应体
-    def build_response(success, data, msg, code, **extra)
+    def build_response(success, data, message, code, **extra)
       response_hash = {
         success: success,
         code: code,
-        msg: msg,
+        message: message,
         data: data # <--- 修改这里：明确写成 data: data
       }
       # 合并额外的字段

@@ -1,0 +1,11 @@
+### index users
+GET http://localhost:3000/users
+
+### show user
+GET http://localhost:3000/users/2
+
+### create user
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{ "name": "John Doe" }
