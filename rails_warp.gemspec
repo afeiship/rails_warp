@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  # 添加对 jbuilder 的依赖 (如果需要)
+   # --- 关键部分：声明对 Rails 的依赖 ---
+  spec.add_dependency "railties", ">= 6.0"
   spec.add_dependency "jbuilder", ">= 2.5"
 end

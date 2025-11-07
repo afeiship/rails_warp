@@ -27,7 +27,7 @@ module RailsWarp
         success: success,
         code: code,
         msg: msg,
-         data
+        data: data # <--- 修改这里：明确写成 data: data
       }
       # 合并额外的字段
       response_hash.merge!(extra) if extra.present?

@@ -35,7 +35,7 @@ module RailsWarp
         success: success,
         code: code,
         msg: msg,
-         data
+        data: data # <--- 修改这里：明确写成 data: data
       }
       # 合并额外的字段
       response_hash.merge!(extra) if extra.present?
@@ -45,14 +45,14 @@ module RailsWarp
 end
 
 # Rails 应用启动时，将 JbuilderExtension 混入到 Jbuilder 的上下文
-Rails.application.config.after_initialize do
-  # Jbuilder 的上下文类通常是 Jbuilder 或 JbuilderTemplate
-  # 尝试混入到 Jbuilder 类
-  if defined?(Jbuilder)
-    Jbuilder.include RailsWarp::JbuilderExtension
-  end
-  # 如果 JbuilderTemplate 存在，也混入它 (在某些 Jbuilder 版本中可能需要)
-  if defined?(JbuilderTemplate)
-    JbuilderTemplate.include RailsWarp::JbuilderExtension
-  end
-end
+# Rails.application.config.after_initialize do
+#   # Jbuilder 的上下文类通常是 Jbuilder 或 JbuilderTemplate
+#   # 尝试混入到 Jbuilder 类
+#   if defined?(Jbuilder)
+#     Jbuilder.include RailsWarp::JbuilderExtension
+#   end
+#   # 如果 JbuilderTemplate 存在，也混入它 (在某些 Jbuilder 版本中可能需要)
+#   if defined?(JbuilderTemplate)
+#     JbuilderTemplate.include RailsWarp::JbuilderExtension
+#   end
+# end
