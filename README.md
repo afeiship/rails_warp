@@ -21,6 +21,9 @@ Or install it yourself as:
 $ gem install rails_warp
 ```
 
+## Resources
+- https://chat.qwen.ai/c/a6cd0b11-a440-4595-9f8b-0352b416a145
+
 ## Contributing
 Contribution directions go here.
 
