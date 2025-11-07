@@ -1,5 +1,5 @@
 # RailsWarp
-Short description and motivation.
+> A Rails plugin for elegant, hash-based response wrapper for clean Rails API responses.
 
 ## Usage
 How to use my plugin.

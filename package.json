@@ -1,0 +1,16 @@
+{
+  "name": "rails_warp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Rails plugin for elegant, hash-based response wrapper for clean Rails API responses.",
+  "scripts": {
+    "dev": "cd test/dummy && rails server",
+    "clean": "rm -rf *.gem",
+    "build": "gem build *.gemspec",
+    "pubpush": "gem push *.gem",
+    "release": "release-it"
+  },
+  "keywords": [],
+  "author": "afeiship",
+  "license": "ISC"
+}
