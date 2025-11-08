@@ -3,6 +3,8 @@ class UsersController < ApplicationController
   # 由于插件在初始化时自动包含了 ResponseWrapper 模块，
   # 你现在可以直接在任何继承自 ApplicationController 的控制器中使用 ok/fail 方法
 
+  skip_before_action :verify_authenticity_token
+
   def index
     users = User.limit(10)
     ok(data: users, message: "Users retrieved successfully", code: 200)
@@ -18,7 +20,7 @@ class UsersController < ApplicationController
   def create
     user = User.new(user_params)
     if user.save
-      ok(data: user, message: "User created successfully", code: 201)
+      ok(data: user, code: 201)
     else
       fail(message: "Validation failed", code: 422, errors: user.errors)
     end
