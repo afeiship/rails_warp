@@ -12,15 +12,15 @@ class UsersController < ApplicationController
     user = User.find(params[:id])
     ok(data: user)
   rescue ActiveRecord::RecordNotFound
-    fail(msg: "User not found", code: 404)
+    fail(message: "User not found", code: 404)
   end
 
   def create
     user = User.new(user_params)
     if user.save
-      ok(data: user, msg: "User created successfully", code: 201)
+      ok(data: user, message: "User created successfully", code: 201)
     else
-      fail(msg: "Validation failed", code: 422, errors: user.errors)
+      fail(message: "Validation failed", code: 422, errors: user.errors)
     end
   end
 
