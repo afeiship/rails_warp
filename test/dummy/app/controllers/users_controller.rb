@@ -5,7 +5,7 @@ class UsersController < ApplicationController
 
   def index
     users = User.limit(10)
-    ok(data: users, msg: "Users retrieved successfully", code: 200)
+    ok(data: users, message: "Users retrieved successfully", code: 200)
   end
 
   def show

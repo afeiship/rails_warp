@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails_warp (0.1.0)
+    rails_warp (1.0.1)
       jbuilder (>= 2.5)
 
 GEM
