@@ -1,0 +1,299 @@
+# RailsWarp
+
+> A Rails plugin for elegant, hash-based response wrapper for clean Rails API responses. It provides a simple, consistent way to structure API responses with success/error states, HTTP status mapping, and Jbuilder integration. All components are automatically included into ActionController and Jbuilder without manual configuration.
+
+## Overview
+
+RailsWarp is a lightweight Rails Engine that extends ActionController::Base and Jbuilder with two simple methods: `ok` and `fail`. These methods provide a unified response structure across your API, making it easier for front-end developers to consume your endpoints and handle errors consistently.
+
+**Important notes for agents:**
+- RailsWarp requires Rails 7+ and Jbuilder (optional)
+- It's automatically included into ActionController and Jbuilder via Rails Engine hooks
+- All methods accept hash keyword arguments for flexibility
+- HTTP status codes are automatically mapped (e.g., 404 → :not_found)
+- Works seamlessly with Jbuilder templates
+
+## Documentation
+
+- [README.md](README.md): Complete usage guide with examples
+- [MIT-LICENSE](MIT-LICENSE): License information
+- [RubyGems](https://rubygems.org/gems/rails_warp): Gem package page
+
+## Key Features
+
+- **Automatic Inclusion:** No manual includes needed - Rails Engine hooks handle everything
+- **Hash-Based API:** Clean, readable syntax with keyword arguments
+- **Dual Support:** Works in both Controllers and Jbuilder templates
+- **Status Mapping:** Automatic HTTP status code mapping to symbols (400→:bad_request)
+- **Jbuilder Integration:** Full support with aliases (ok/fail or warp_ok/warp_fail)
+- **Custom Data:** Support for extra fields via hash splat operator
+- **Error Handling:** Designed for use with rescue_from blocks
+
+## Response Structure
+
+All responses follow this consistent structure:
+
+```ruby
+{
+  success: true/false,    # Boolean indicating success state
+  code: 200,            # HTTP status code
+  message: "success",    # Optional message string
+  data: { ... }          # Optional data payload
+}
+```
+
+Additional fields can be merged into the response using the hash splat operator (`**options`).
+
+## Installation
+
+Add to your Gemfile:
+
+```ruby
+gem "rails_warp"
+```
+
+Then run:
+
+```bash
+$ bundle install
+```
+
+Or install manually:
+
+```bash
+$ gem install rails_warp
+```
+
+No further configuration required - RailsWarp is automatically loaded!
+
+## Controller Usage
+
+### Basic Success Response
+
+```ruby
+class UsersController < ApplicationController
+  def show
+    user = User.find(params[:id])
+    ok data: { user: user }
+  end
+end
+```
+
+### Success with Custom Message and Code
+
+```ruby
+def create
+  user = User.new(user_params)
+  if user.save
+    ok data: { user: user }, message: "created", code: 201
+  else
+    fail message: "validation error", code: 422, data: { errors: user.errors.full_messages }
+  end
+end
+```
+
+### Extra Fields (Meta, Pagination, etc.)
+
+```ruby
+def index
+  users = User.page(params[:page])
+  ok data: { users: users },
+     message: "users retrieved",
+     meta: {
+       request_id: request.request_id,
+       total: User.count,
+       page: params[:page]
+     }
+end
+```
+
+## Jbuilder Usage
+
+RailsWarp is automatically mixed into Jbuilder. Use `ok` or `fail` directly in your templates:
+
+```ruby
+# app/views/users/show.json.jbuilder
+json.ok data: { user: { id: @user.id, name: @user.name } }, message: "ok"
+```
+
+```ruby
+# app/views/shared/error.json.jbuilder
+json.fail message: "not found", code: 404, data: { resource: "User" }
+```
+
+You can also use the fully-qualified aliases:
+
+```ruby
+json.warp_ok data: { list: @items.map { |i| { id: i.id, name: i.name } } },
+           meta: { total: @items.count }
+
+json.warp_fail message: "server error", code: 500
+```
+
+## HTTP Status Code Mapping
+
+RailsWarp automatically maps status codes to HTTP symbols:
+
+| Code | Symbol |
+|------|--------|
+| 200, 201, 204 | Returned as-is (numeric) |
+| 400 | :bad_request |
+| 401 | :unauthorized |
+| 403 | :forbidden |
+| 404 | :not_found |
+| 422 | :unprocessable_entity |
+| 500 | :internal_server_error |
+| Other codes | Passed through as-is |
+
+## Global Error Handling
+
+RailsWarp is designed to work seamlessly with Rails' `rescue_from`:
+
+```ruby
+class ApplicationController < ActionController::Base
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    fail message: e.message, code: 404
+  end
+
+  rescue_from StandardError do |e|
+    fail message: "internal error", code: 500, data: { error: e.class.name }
+  end
+end
+```
+
+## Method Signatures
+
+### `ok(**options)`
+
+Success response method.
+
+**Parameters:**
+- `data:` (Hash) - The response payload
+- `message:` (String, optional) - Success message (default: nil)
+- `code:` (Integer, optional) - HTTP status code (default: 200)
+- `**extra:` - Any additional fields to merge into response
+
+**Example:**
+```ruby
+ok data: { user: user }, message: "success", code: 201, meta: { timestamp: Time.now }
+```
+
+### `fail(**options)`
+
+Failure response method.
+
+**Parameters:**
+- `message:` (String, optional) - Error message (default: "error")
+- `code:` (Integer, optional) - HTTP status code (default: 500)
+- `data:` (Hash, optional) - Additional error details
+- `**extra:` - Any additional fields to merge into response
+
+**Example:**
+```ruby
+fail message: "validation failed", code: 422, data: { errors: ["Name is required"] }
+```
+
+## Usage Notes for Agents
+
+- **Always use hash keyword arguments** - Both `ok` and `fail` accept `**options` only
+- **Data is optional** - You can call `ok message: "deleted"` without data
+- **Message is optional for ok** - Success responses don't require a message
+- **Status codes are integers** - Use numeric codes (404, 422, etc.), not symbols
+- **Extra fields use hash splat** - Pass `meta:`, `pagination:`, etc. directly
+- **Jbuilder uses merge!** - Response is merged into the jbuilder object, not rendered
+- **No manual includes needed** - RailsWarp handles all inclusions automatically
+
+## Architecture
+
+RailsWarp uses two main modules:
+
+1. **ResponseWrapper** (`lib/rails_warp/response_wrapper.rb`):
+   - Included into ActionController::Base via initializer
+   - Provides `ok` and `fail` instance methods
+   - Handles JSON rendering with status mapping
+
+2. **JbuilderExtension** (`lib/rails_warp/jbuilder_extension.rb`):
+   - Included into Jbuilder and JbuilderTemplate after initialization
+   - Provides `warp_ok`, `warp_fail` and their aliases
+   - Merges response hash into jbuilder template
+
+## Files
+
+- `lib/rails_warp.rb` - Main entry point
+- `lib/rails_warp/version.rb` - Version constant
+- `lib/rails_warp/engine.rb` - Rails Engine with initializer hooks
+- `lib/rails_warp/response_wrapper.rb` - Controller mixin module
+- `lib/rails_warp/jbuilder_extension.rb` - Jbuilder mixin module
+- `rails_warp.gemspec` - Gem specification
+- `Gemfile` - Development dependencies
+- `Rakefile` - Build tasks
+- `test/` - Test suite (uses dummy Rails app)
+
+## Testing
+
+The test suite uses a dummy Rails application in `test/dummy/`. Run tests with:
+
+```bash
+$ bundle exec rake test
+```
+
+## Common Patterns
+
+### Pagination Response
+
+```ruby
+def index
+  posts = Post.page(params[:page]).per(20)
+  ok data: { posts: posts },
+     meta: {
+       total: Post.count,
+       page: params[:page],
+       per_page: 20,
+       total_pages: posts.total_pages
+     }
+end
+```
+
+### CRUD Operations
+
+```ruby
+def create
+  record = Model.new(model_params)
+  if record.save
+    ok data: { record: record }, message: "created successfully", code: 201
+  else
+    fail message: "validation failed", code: 422, data: { errors: record.errors.full_messages }
+  end
+end
+
+def update
+  record = Model.find(params[:id])
+  if record.update(model_params)
+    ok data: { record: record }, message: "updated successfully"
+  else
+    fail message: "validation failed", code: 422, data: { errors: record.errors.full_messages }
+  end
+end
+
+def destroy
+  record = Model.find(params[:id])
+  record.destroy
+  ok data: { record: record }, message: "deleted successfully", code: 204
+end
+```
+
+### API Version Response
+
+```ruby
+def version
+  ok data: {
+    version: "1.0.0",
+    api_name: "MyAPI",
+    environment: Rails.env
+  }, message: "api information"
+end
+```
+
+## License
+
+MIT License - See [MIT-LICENSE](MIT-LICENSE) for details.
