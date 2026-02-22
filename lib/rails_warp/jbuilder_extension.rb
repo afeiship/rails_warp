@@ -2,23 +2,19 @@
 module RailsWarp
   module JbuilderExtension
     def ok(**options)
-      message = options[:message].nil? ? "success" : options[:message]
-      code = options[:code] || 200
-
       set! :success, true
-      set! :code, code
-      set! :message, message
+      set! :code, options[:code] || 200
+
+      set! :message, options[:message] if options.key?(:message)
 
       yield if block_given?
     end
 
     def fail(**options)
-      message = options[:message].nil? ? "error" : options[:message]
-      code = options[:code] || 500
-
       set! :success, false
-      set! :code, code
-      set! :message, message
+      set! :code, options[:code] || 500
+
+      set! :message, options[:message] if options.key?(:message)
 
       yield if block_given?
     end
