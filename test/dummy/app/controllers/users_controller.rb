@@ -6,24 +6,33 @@ class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
-    users = User.limit(10)
-    ok(data: users, message: "Users retrieved successfully", code: 200)
+    @users = User.limit(10)
   end
 
   def show
-    user = User.find(params[:id])
-    ok(data: user)
+    @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    fail(message: "User not found", code: 404)
+    # 返回 jbuilder 错误响应
+    render json: { success: false, code: 404, message: "User not found", data: nil }
   end
 
   def create
-    user = User.new(user_params)
-    if user.save
-      ok(data: user, code: 201)
-    else
-      fail(message: "Validation failed", code: 422, errors: user.errors)
-    end
+    @user = User.new(user_params)
+    @success = @user.save
+  end
+
+  def error
+    @user = User.new
+    @user.errors.add(:name, "can't be blank")
+    @user.errors.add(:email, "is invalid")
+  end
+
+  def with_partial
+    @users = User.limit(5)
+  end
+
+  def single_with_partial
+    @user = User.find(params[:id])
   end
 
   private

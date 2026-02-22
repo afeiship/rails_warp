@@ -1,11 +1,26 @@
-### index users
-GET http://localhost:3000/users
+### index users - 使用 warp_ok
+GET http://localhost:3000/users.json
 
-### show user
-GET http://localhost:3000/users/2
+### show user - 使用 warp_ok
+GET http://localhost:3000/users/1.json
 
-### create user
-POST http://localhost:3000/users
+### create user (success) - 使用条件 warp_ok/warp_fail
+POST http://localhost:3000/users.json
 Content-Type: application/json
 
-{ "name": "John Doe111" }
+{ "user": { "name": "John Doe122" } }
+
+### create user (validation fail) - 使用条件 warp_ok/warp_fail
+POST http://localhost:3000/users.json
+Content-Type: application/json
+
+{ "user": { "name": "" } }
+
+### error response - 使用 warp_fail
+GET http://localhost:3000/users/error.json
+
+### users with partials - 使用 warp_ok + partial 模板
+GET http://localhost:3000/users/with_partial.json
+
+### single user with partial - 使用 warp_ok + single partial
+GET http://localhost:3000/users/1/single_with_partial.json

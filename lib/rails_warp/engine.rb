@@ -11,15 +11,28 @@ module RailsWarp
     end
 
     # 将 Jbuilder 扩展模块包含到 Jbuilder 类中
-    config.after_initialize do |app|
-      # Jbuilder 的上下文类通常是 Jbuilder 或 JbuilderTemplate
-      # 尝试混入到 Jbuilder 类
-      if defined?(Jbuilder)
-        Jbuilder.include RailsWarp::JbuilderExtension
+    initializer "rails_warp.jbuilder", before: :eager_load! do |app|
+      # 显式 require jbuilder 以确保 handler 被注册
+      require 'jbuilder'
+
+      # 确保 jbuilder handler 被注册
+      if defined?(JbuilderHandler) && !ActionView::Template.registered_template_handler(:jbuilder)
+        ActionView::Template.register_template_handler(:jbuilder, JbuilderHandler)
       end
-      # 如果 JbuilderTemplate 存在，也混入它 (在某些 Jbuilder 版本中可能需要)
-      if defined?(JbuilderTemplate)
-        JbuilderTemplate.include RailsWarp::JbuilderExtension
+
+      # 将 JbuilderExtension 包含到 Jbuilder 类
+      if defined?(Jbuilder)
+        Jbuilder.include(RailsWarp::JbuilderExtension)
+      end
+
+      # 某些版本的 jbuilder 使用 Jbuilder::Template
+      if defined?(Jbuilder::Template)
+        Jbuilder::Template.include(RailsWarp::JbuilderExtension)
+      end
+
+      # 兼容旧版本的 JbuilderTemplate
+      if defined?(JbuilderTemplate) && defined?(JbuilderTemplate) != defined?(Jbuilder::Template)
+        JbuilderTemplate.include(RailsWarp::JbuilderExtension)
       end
     end
   end
