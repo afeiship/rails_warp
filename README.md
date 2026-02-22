@@ -3,11 +3,11 @@
 
 ## Usage
 
-RailsWarp is automatically included into ActionController and Jbuilder. You don\u2019t need to include any module manually.
+RailsWarp is automatically included into ActionController and Jbuilder. You don't need to include any module manually.
 
-- Controllers: call ok and fail directly.
+### Controllers
 
-Basic controller examples:
+Call `ok` and `fail` directly in your controllers:
 
 ```ruby
 class UsersController < ApplicationController
@@ -27,22 +27,35 @@ class UsersController < ApplicationController
 end
 ```
 
-Add extra fields (merged into the response):
+#### Parameters
 
-```ruby
-ok data: { user: user }, meta: { request_id: request.request_id }
+- `data` - The response data (any JSON-serializable object)
+- `message` - Custom message (default: "success" for ok, "error" for fail)
+- `code` - HTTP status code (default: 200 for ok, 500 for fail)
+- Additional keyword arguments are merged into the response
+
+#### Response Format
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "success",
+  "data": { ... }
+}
 ```
 
-HTTP status mapping:
-- 200, 201, 204: returned as-is
-- 400: bad_request
-- 401: unauthorized
-- 403: forbidden
-- 404: not_found
-- 422: unprocessable_entity
-- 500: internal_server_error
+#### HTTP Status Mapping
 
-Global error handling example:
+- `200`, `201`, `204`: returned as-is
+- `400`: bad_request
+- `401`: unauthorized
+- `403`: forbidden
+- `404`: not_found
+- `422`: unprocessable_entity
+- `500`: internal_server_error
+
+#### Global Error Handling
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -56,23 +69,49 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-Jbuilder usage (already mixed in, call ok/fail inside templates):
+### Jbuilder Templates
+
+Use `json.ok` and `json.fail` in your Jbuilder templates:
 
 ```ruby
 # app/views/users/show.json.jbuilder
-json.ok data: { user: { id: @user.id, name: @user.name } }, message: "ok"
+json.ok message: "User found", code: 200
+json.data do
+  json.id @user.id
+  json.name @user.name
+end
 
 # app/views/shared/error.json.jbuilder
-json.fail message: "not found", code: 404, data: { resource: "User" }
-
-# extra fields
-json.ok data: { list: @items.map { |i| { id: i.id, name: i.name } } }, meta: { total: @items.count }
+json.fail message: "not found", code: 404
+json.data do
+  json.resource "User"
+end
 ```
 
-Aliases in Jbuilder: you can also use `json.warp_ok` and `json.warp_fail`.
+#### With Partials
 
+```ruby
+# app/views/users/index.json.jbuilder
+json.ok message: "Users retrieved", code: 200
+json.data do
+  json.array! @users, partial: "users/user", as: :user
+end
+```
+
+#### Extra Fields
+
+Additional keyword arguments are merged into the response root:
+
+```ruby
+json.ok data: { list: @items }, meta: { total: @items.count }
+```
+
+#### Aliases
+
+You can also use `json.warp_ok` and `json.warp_fail` as aliases.
 
 ## Installation
+
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -89,11 +128,10 @@ Or install it yourself as:
 $ gem install rails_warp
 ```
 
-## Resources
-- https://chat.qwen.ai/c/a6cd0b11-a440-4595-9f8b-0352b416a145
-
 ## Contributing
+
 Contribution directions go here.
 
 ## License
+
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
