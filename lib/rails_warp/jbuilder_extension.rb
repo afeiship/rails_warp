@@ -6,10 +6,23 @@ module RailsWarp
       data = options[:data]
       message = options[:message] || "success"
       code = options[:code] || 200
-      # 构建响应哈希
-      response_hash = build_response(true, data, message, code, **options.except(:data, :message, :code))
-      # 将响应哈希的内容合并到当前 jbuilder 对象
-      merge!(response_hash)
+
+      # 如果提供了块，将其用于构建 data
+      if block_given?
+        set! :success, true
+        set! :code, code
+        set! :message, message
+        # 使用 set! 和一个临时对象来捕获 block 的内容
+        data_hash = _capture_block do
+          yield
+        end
+        set! :data, data_hash
+      else
+        # 构建响应哈希
+        response_hash = build_response(true, data, message, code, **options.except(:data, :message, :code))
+        # 将响应哈希的内容合并到当前 jbuilder 对象
+        merge!(response_hash)
+      end
     end
 
     # 失败响应结构，用于 jbuilder 模板
@@ -17,10 +30,23 @@ module RailsWarp
       message = options[:message] || "error"
       code = options[:code] || 500
       data = options[:data]
-      # 构建响应哈希
-      response_hash = build_response(false, data, message, code, **options.except(:data, :message, :code))
-      # 将响应哈希的内容合并到当前 jbuilder 对象
-      merge!(response_hash)
+
+      # 如果提供了块，将其用于构建 data
+      if block_given?
+        set! :success, false
+        set! :code, code
+        set! :message, message
+        # 使用 set! 和一个临时对象来捕获 block 的内容
+        data_hash = _capture_block do
+          yield
+        end
+        set! :data, data_hash
+      else
+        # 构建响应哈希
+        response_hash = build_response(false, data, message, code, **options.except(:data, :message, :code))
+        # 将响应哈希的内容合并到当前 jbuilder 对象
+        merge!(response_hash)
+      end
     end
 
     # 为 jbuilder 提供别名方法
@@ -29,13 +55,22 @@ module RailsWarp
 
     private
 
+    # 捕获 block 的内容并返回哈希
+    def _capture_block
+      # 创建一个新的 Jbuilder 实例来捕获 block 内容
+      temp = JbuilderTemplate.new(@context)
+      yield(temp) if block_given?
+      # 获取生成的哈希
+      JSON.parse(temp.target!)
+    end
+
     # 内部构建响应体的辅助方法
     def build_response(success, data, message, code, **extra)
       response_hash = {
         success: success,
         code: code,
         message: message,
-        data: data # <--- 修改这里：明确写成 data: data
+        data: data
       }
       # 合并额外的字段
       response_hash.merge!(extra) if extra.present?
@@ -43,16 +78,3 @@ module RailsWarp
     end
   end
 end
-
-# Rails 应用启动时，将 JbuilderExtension 混入到 Jbuilder 的上下文
-# Rails.application.config.after_initialize do
-#   # Jbuilder 的上下文类通常是 Jbuilder 或 JbuilderTemplate
-#   # 尝试混入到 Jbuilder 类
-#   if defined?(Jbuilder)
-#     Jbuilder.include RailsWarp::JbuilderExtension
-#   end
-#   # 如果 JbuilderTemplate 存在，也混入它 (在某些 Jbuilder 版本中可能需要)
-#   if defined?(JbuilderTemplate)
-#     JbuilderTemplate.include RailsWarp::JbuilderExtension
-#   end
-# end
