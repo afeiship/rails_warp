@@ -1,13 +1,13 @@
 # 根据实例变量 @success 来决定返回成功或失败响应
 if @success
-  json.warp_ok code: 201
+  json.ok code: 201
   json.data do
     json.id @user.id
     json.name @user.name
     json.created_at @user.created_at
   end
 else
-  json.warp_fail message: "Validation failed", code: 422
+  json.fail message: "Validation failed", code: 422
   json.data do
     json.errors @user.errors.full_messages
   end

@@ -1,5 +1,5 @@
-# 使用 warp_fail 方法
-json.warp_fail message: "Validation failed", code: 422
+# 使用 fail 方法
+json.fail message: "Validation failed", code: 422
 json.data do
   json.field_errors do
     @user.errors.each do |attribute, messages|

@@ -1,5 +1,5 @@
-# 使用 warp_ok 方法
-json.warp_ok message: "Users retrieved successfully", code: 200
+# 使用 ok 方法
+json.ok message: "Users retrieved successfully", code: 200
 json.data do
   json.array! @users do |user|
     json.id user.id

@@ -1,5 +1,5 @@
-# 使用 json.warp_ok 方法
-json.warp_ok message: "User found", code: 200
+# 使用 ok 方法
+json.ok message: "User found", code: 200
 json.data do
   json.id @user.id
   json.name @user.name
