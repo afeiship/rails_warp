@@ -5,7 +5,8 @@ module RailsWarp
       set! :success, true
       set! :code, options[:code] || 200
 
-      set! :message, options[:message] if options.key?(:message)
+      # message 字段始终存在，未传递时为 null
+      set! :message, options.key?(:message) ? options[:message] : nil
 
       yield if block_given?
     end
@@ -14,7 +15,8 @@ module RailsWarp
       set! :success, false
       set! :code, options[:code] || 500
 
-      set! :message, options[:message] if options.key?(:message)
+      # message 字段始终存在，未传递时为 null
+      set! :message, options.key?(:message) ? options[:message] : nil
 
       yield if block_given?
     end
