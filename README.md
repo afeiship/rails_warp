@@ -30,8 +30,8 @@ end
 #### Parameters
 
 - `data` - The response data (any JSON-serializable object)
-- `message` - Custom message (default: "success" for ok, "error" for fail)
-- `code` - HTTP status code (default: 200 for ok, 500 for fail)
+- `message` - Optional custom message (defaults to `null` if not provided)
+- `code` - HTTP status code (default: `200` for ok, `500` for fail)
 - Additional keyword arguments are merged into the response
 
 #### Response Format

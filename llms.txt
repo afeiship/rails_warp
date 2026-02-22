@@ -37,7 +37,7 @@ All responses follow this consistent structure:
 {
   success: true/false,    # Boolean indicating success state
   code: 200,            # HTTP status code
-  message: "success",    # Optional message string
+  message: "success",    # Optional message string (null if not provided)
   data: { ... }          # Optional data payload
 }
 ```
@@ -113,12 +113,19 @@ RailsWarp is automatically mixed into Jbuilder. Use `ok` or `fail` directly in y
 
 ```ruby
 # app/views/users/show.json.jbuilder
-json.ok data: { user: { id: @user.id, name: @user.name } }, message: "ok"
+json.ok message: "User found", code: 200
+json.data do
+  json.id @user.id
+  json.name @user.name
+end
 ```
 
 ```ruby
 # app/views/shared/error.json.jbuilder
-json.fail message: "not found", code: 404, data: { resource: "User" }
+json.fail message: "not found", code: 404
+json.data do
+  json.resource "User"
+end
 ```
 
 You can also use the fully-qualified aliases:
@@ -169,7 +176,7 @@ Success response method.
 
 **Parameters:**
 - `data:` (Hash) - The response payload
-- `message:` (String, optional) - Success message (default: nil)
+- `message:` (String, optional) - Success message (default: null)
 - `code:` (Integer, optional) - HTTP status code (default: 200)
 - `**extra:` - Any additional fields to merge into response
 
@@ -183,7 +190,7 @@ ok data: { user: user }, message: "success", code: 201, meta: { timestamp: Time.
 Failure response method.
 
 **Parameters:**
-- `message:` (String, optional) - Error message (default: "error")
+- `message:` (String, optional) - Error message (default: null)
 - `code:` (Integer, optional) - HTTP status code (default: 500)
 - `data:` (Hash, optional) - Additional error details
 - `**extra:` - Any additional fields to merge into response
@@ -197,7 +204,7 @@ fail message: "validation failed", code: 422, data: { errors: ["Name is required
 
 - **Always use hash keyword arguments** - Both `ok` and `fail` accept `**options` only
 - **Data is optional** - You can call `ok message: "deleted"` without data
-- **Message is optional for ok** - Success responses don't require a message
+- **Message is optional** - If not provided, `message` field will be `null`
 - **Status codes are integers** - Use numeric codes (404, 422, etc.), not symbols
 - **Extra fields use hash splat** - Pass `meta:`, `pagination:`, etc. directly
 - **Jbuilder uses merge!** - Response is merged into the jbuilder object, not rendered

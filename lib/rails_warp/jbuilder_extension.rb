@@ -5,7 +5,7 @@ module RailsWarp
       set! :success, true
       set! :code, options[:code] || 200
 
-      # message 字段始终存在，未传递时为 null
+      # message field always exists, defaults to null when not provided
       set! :message, options.key?(:message) ? options[:message] : nil
 
       yield if block_given?
@@ -15,13 +15,13 @@ module RailsWarp
       set! :success, false
       set! :code, options[:code] || 500
 
-      # message 字段始终存在，未传递时为 null
+      # message field always exists, defaults to null when not provided
       set! :message, options.key?(:message) ? options[:message] : nil
 
       yield if block_given?
     end
 
-    # 别名方法
+    # Alias methods
     alias_method :warp_ok, :ok
     alias_method :warp_fail, :fail
   end
