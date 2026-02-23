@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails_warp (1.0.1)
+    rails_warp (1.0.3)
       jbuilder (>= 2.5)
 
 GEM
@@ -262,4 +262,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.6.3
+   2.5.22
